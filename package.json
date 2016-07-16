@@ -24,11 +24,14 @@
   "devDependencies": {
     "babel-plugin-transform-es2015-modules-simple-amd": "0.3.0",
     "eslint": "3.1.0",
-    "eslint-config-google": "^0.6.0",
     "eslint-config-standard": "^5.3.5",
     "eslint-plugin-promise": "^2.0.0",
     "eslint-plugin-standard": "^2.0.0",
     "lintspaces-cli": "0.3.0",
+    "webpack": "1.13.1",
+  },
+  "devDependencies": {
+    "eslint": "2.11.1",
     "webpack-dev-server": "1.14.0"
   }
 }
