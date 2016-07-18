@@ -10,6 +10,11 @@ d3Chart.create = (el, props, state) => {
       .attr('width', props.width)
       .attr('height', props.height);
 
+  svg.append('rect')
+    .attr('class', 'd3bg')
+    .attr('width', props.width)
+    .attr('height', props.height);
+  
   svg.append('g')
       .attr('class', 'd3-points');
 

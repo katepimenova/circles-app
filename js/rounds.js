@@ -16,19 +16,17 @@ var RoundsPage = React.createClass({
   render() {
     return (
       <div className='rounds-page'>
-        <h2>
-          Rounds
-        </h2>
+        <h2>Rounds</h2>
         <div className='rounds-chart'>
           <Chart
             appState={this.state}
             setAppState={this.setAppState}
           />
-          <RoundControl
-            appState={this.state}
-            setAppState={this.setAppState}
-          />
         </div>
+        <RoundControl
+          appState={this.state}
+          setAppState={this.setAppState}
+        />
       </div>
     );
   }
@@ -79,6 +77,11 @@ var RoundControl = React.createClass({
         {rounds.length < 5 &&
           <div>{this.addRound(rounds)}</div>
         }
+        {!!this.state.error &&
+          <div className='error'>
+            {this.state.error}
+          </div>
+        }
       </div>
     );
   },
@@ -93,7 +96,7 @@ var RoundControl = React.createClass({
         {round.y};
       </div>
       <div>
-        <label>radius: </label>
+        <label>diameter: </label>
         {round.z};
       </div>
       <div>
@@ -112,11 +115,11 @@ var RoundControl = React.createClass({
         <input type='number' name='y' ref='y' min='0' max='100' onChange={this.handleChange} value={this.state.y} />
       </div>
       <div>
-        <label> radius: </label>
+        <label> diameter: </label>
         <input type='number' name='z' ref='z' min='0' max='100' onChange={this.handleChange} value={this.state.z} />
       </div>
       <div>
-        <button onClick={this.handleAdd} disabled={this.state.error}>Add</button>
+        <button onClick={this.handleAdd} disabled={!!this.state.error}>Add</button>
       </div>
     </div>;
   },
@@ -138,6 +141,21 @@ var RoundControl = React.createClass({
     this.props.setAppState(roundsState);
   },
   handleChange(e) {
+    this.setState({error: false});
+    var appState = this.props.appState;
+    if (e.target.name === 'z') {
+      // validate that the sum of circles diameters cannot be larger than the viewport width
+      var sum = _.reduce(appState.data, (result, round) => result + parseInt(round.z), 0);
+      if ((sum + parseInt(e.target.value)) > appState.domain.x[1]) {
+        this.setState({error: 'Error: Sum of circles diameters cannot be larger than the viewport width'});
+      }
+    }
+    if (e.target.name === 'x' || e.target.name === 'y') {
+      // validate corrdinates
+      if (parseInt(e.target.value) > appState.domain[e.target.name][1] || parseInt(e.target.value) < appState.domain[e.target.name][0]) {
+        this.setState({error: 'Error: This coordinates are outside the viewport'});
+      }
+    }
     this.setState({[e.target.name]: e.target.value});
   }
 });
