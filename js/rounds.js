@@ -2,16 +2,17 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import d3Chart from './d3chart';
+import models from './models';
 
 var RoundsPage = React.createClass({
   getInitialState() {
     return {
-      data: [],
+      data: this.props.roundsCollection || [],
       domain: {x: [0, 100], y: [0, 100]}
     };
   },
-  setAppState(partialState) {
-    return this.setState(partialState);
+  setAppState(state) {
+    return this.setState(state);
   },
   render() {
     return (
@@ -70,12 +71,12 @@ var RoundControl = React.createClass({
     var rounds = this.props.appState.data;
     return (
       <div>
-        <h4>You can add up to 5 rounds in the chart. Use x/y/radius inputs to define rounds parameters.</h4>
+        <h4>You can add up to 5 rounds in the chart. Use x/y/diameter inputs to define rounds parameters.</h4>
         {_.map(rounds, (round) => {
-          return this.viewRound(rounds, round);
+          return this.viewRoundParameters(rounds, round);
         })}
         {rounds.length < 5 &&
-          <div>{this.addRound(rounds)}</div>
+          <div>{this.addRoundControl(rounds)}</div>
         }
         {!!this.state.error &&
           <div className='error'>
@@ -85,7 +86,7 @@ var RoundControl = React.createClass({
       </div>
     );
   },
-  viewRound(rounds, round) {
+  viewRoundParameters(rounds, round) {
     return <div className='rounds-controls' key={round.id}>
       <div>
         <label>x: </label>
@@ -104,7 +105,7 @@ var RoundControl = React.createClass({
       </div>
     </div>;
   },
-  addRound() {
+  addRoundControl() {
     return <div className='rounds-controls'>
       <div>
         <label>x: </label>
@@ -124,18 +125,25 @@ var RoundControl = React.createClass({
     </div>;
   },
   handleAdd() {
-    var appState = this.props.appState;
-    var roundsState = _.clone(appState);
-    var values = this.refs;
-    roundsState.data.push({
-      id: !_.isEmpty(appState.data) ? _.last(appState.data).id + 1 : 1,
-      x: values.x.value,
-      y: values.y.value,
-      z: values.z.value
-    });
+    var roundsState = _.clone(this.props.appState);
+    var round = new models.Round();
+    var roundData = {
+      id: !_.isEmpty(roundsState.data) ? _.last(roundsState.data).id + 1 : 1,
+      x: this.refs.x.value,
+      y: this.refs.y.value,
+      z: this.refs.z.value
+    };
+    round.set(roundData);
+    app.rounds.add(round);
+    round.save();
+
+    roundsState.data.push(roundData);
     this.props.setAppState(roundsState);
   },
   handleRemove(roundId) {
+    var round = app.rounds.get(roundId);
+    round.destroy();
+
     var roundsState = _.clone(this.props.appState);
     _.remove(roundsState.data, (round) => round.id === roundId);
     this.props.setAppState(roundsState);

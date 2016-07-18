@@ -1,16 +1,22 @@
 import Backbone from 'backbone';
+import LocalStorage from './backbone.localStorage';
 
 var models = {};
 
 models.Round = Backbone.Model.extend({
   constructorName: 'Round',
-  urlRoot: '/api/round'
+  defaults: {
+    id: null,
+    x: null,
+    y: null,
+    z: null
+  }
 });
 
 models.Rounds = Backbone.Collection.extend({
   constructorName: 'Rounds',
   model: models.Round,
-  url: '/api/rounds'
+  localStorage: new LocalStorage('rounds-collection')
 });
 
 export default models;
