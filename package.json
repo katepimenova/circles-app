@@ -11,12 +11,8 @@
   "scripts": {
     "lint": "npm run lintspaces && npm run eslint",
     "eslint": "eslint .",
-<<<<<<< HEAD
     "lintspaces": "lintspaces -nt -d spaces -i 'js-comments' -s 2 -l 2 styles/**",
     "dev-server": "webpack-dev-server --hot --inline"
-=======
-    "lintspaces": "find styles -name '*.less' -o -name '*.css' | xargs lintspaces -nt -d spaces -i 'js-comments' -s 2 -l 2"
->>>>>>> 564d3c861934f5a75d86621b1b2f7727ae20e04c
   },
   "dependencies": {
     "css-loader": "^0.7.0",
@@ -40,21 +36,8 @@
     "webpack": "1.13.1"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "eslint": "2.11.1",
     "eslint-plugin-react": "^5.2.2",
-=======
-    "babel-plugin-transform-es2015-modules-simple-amd": "0.3.0",
-    "eslint": "3.1.0",
-    "eslint-config-standard": "^5.3.5",
-    "eslint-plugin-promise": "^2.0.0",
-    "eslint-plugin-standard": "^2.0.0",
-    "lintspaces-cli": "0.3.0",
-    "webpack": "1.13.1",
-  },
-  "devDependencies": {
-    "eslint": "2.11.1",
->>>>>>> 564d3c861934f5a75d86621b1b2f7727ae20e04c
     "webpack-dev-server": "1.14.0"
   }
 }
