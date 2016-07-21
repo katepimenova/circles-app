@@ -81,13 +81,11 @@ var CirclesDataTable = React.createClass({
         {circles.length < 5 &&
           this.renderNewCircleForm()
         }
-        {!_.isEmpty(errors) &&
-          <ul className='error'>
-            {_.map(errors, (error, key) =>
-              <li key={key}>{error}</li>)
-            }
-          </ul>
-        }
+        <ul className='error'>
+          {_.map(errors, (error, key) =>
+            <li key={key}>{error}</li>)
+          }
+        </ul>
       </div>
     );
   },
@@ -112,15 +110,22 @@ var CirclesDataTable = React.createClass({
   },
   renderNewCircleForm() {
     var {circle} = this.state;
-    var errors = circle.validationError;
+    var {domain} = this.props;
+    var errors = circle.validationError || {};
     return <div className='circles-controls'>
       <span>&nbsp;</span>
-      {_.map(circle.attributes, (value, key) =>
-        <div key={key}>
-          <label>{key === 'r' ? 'radius' : key}: </label>
-          <input className={errors && errors[key] && 'input-error'} type='number' name={key} min='0' max='100' onChange={this.onChange} value={value} />
-        </div>
-      )}
+      <div>
+        <label>x: </label>
+        <input className={!!errors.x && 'input-error'} type='number' name='x' min={domain.x[0]} max={domain.x[1]} onChange={this.onChange} value={circle.get('x')} />
+      </div>
+      <div>
+        <label>y: </label>
+        <input className={!!errors.y && 'input-error'} type='number' name='y' min={domain.y[0]} max={domain.y[1]} onChange={this.onChange} value={circle.get('y')} />
+      </div>
+      <div>
+        <label>radius: </label>
+        <input className={!!errors.r && 'input-error'} type='number' name='r' min='0' max='50' onChange={this.onChange} value={circle.get('r')} />
+      </div>
       <div>
         <button onClick={this.addCircle} disabled={!_.isEmpty(errors)}>Add Circle</button>
       </div>
@@ -128,18 +133,18 @@ var CirclesDataTable = React.createClass({
   },
   addCircle() {
     var {circle} = this.state;
-    var {circles, updateCircles} = this.props;
+    var {circles, domain, updateCircles} = this.props;
 
-    circles.add(circle);
-    circle.save(null, {validate: false});
+    circle.validationError = circle.validate(circle.attributes, {
+      radiusMax: this.getRadiusMax(),
+      xMax: domain.x[1],
+      yMax: domain.y[1]});
+    if (!circle.validationError) {
+      var newCircle = new models.Circle(circle.attributes);
+      circles.add(newCircle);
+      newCircle.save(null, {validate: false});
+    }
     updateCircles(circles);
-    this.setState({
-      circle: new models.Circle({
-        x: 0,
-        y: 0,
-        r: 5
-      })
-    });
   },
   removeCircle(circleId) {
     var {circles, updateCircles} = this.props;
@@ -148,13 +153,18 @@ var CirclesDataTable = React.createClass({
   },
   onChange(e) {
     var {circle} = this.state;
-    var {circles, domain} = this.props;
+    var {domain} = this.props;
     var {name, value} = e.target;
-
-    var xMax = domain.x[1];
-    var radiusMax = xMax - circles.reduce((result, circle) => result + Number(circle.get('r')), 0);
-    circle.set({[name]: value}, {validate: true, radiusMax, xMax, yMax: domain.y[1]});
+    circle.set({[name]: Number(value)});
+    circle.validationError = circle.validate(circle.attributes, {
+      radiusMax: this.getRadiusMax(),
+      xMax: domain.x[1],
+      yMax: domain.y[1]});
     this.forceUpdate();
+  },
+  getRadiusMax() {
+    var {circles, domain} = this.props;
+    return domain.x[1] - _.sum(circles.map('r')) * 2;
   }
 });
 
